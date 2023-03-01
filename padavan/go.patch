@@ -1,0 +1,74 @@
+From 51b06c87e6d80b2a43939bc6331de2f2339aa164 Mon Sep 17 00:00:00 2001
+From: mingxiaoyu <fengying0347@163.com>
+Date: Tue, 28 Feb 2023 03:49:15 +0000
+Subject: [PATCH 2/2] go
+
+---
+ trunk/Makefile       |  2 +-
+ trunk/tools/Makefile | 21 +++------------------
+ 2 files changed, 4 insertions(+), 19 deletions(-)
+
+diff --git a/trunk/Makefile b/trunk/Makefile
+index 4f1bfdd70..5d4a482df 100644
+--- a/trunk/Makefile
++++ b/trunk/Makefile
+@@ -34,7 +34,7 @@ ROOTDIR        = $(shell pwd)
+ HOSTCC         = gcc
+ ROMFSINST      = $(ROOTDIR)/tools/romfs-inst.sh
+ TFTPDIR        = /tftpboot
+-PATH          := $(PATH):$(ROOTDIR)/tools:$(ROOTDIR)/tools/go/go/bin
++PATH          := $(PATH):$(ROOTDIR)/tools
+ 
+ VERSIONSTR     = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
+ 
+diff --git a/trunk/tools/Makefile b/trunk/tools/Makefile
+index 19f89964d..d1f42c555 100644
+--- a/trunk/tools/Makefile
++++ b/trunk/tools/Makefile
+@@ -1,5 +1,3 @@
+-THISDIR = $(shell pwd)
+-go_version = 1.17.6
+ # use host target
+ CC        = gcc
+ GCC       = gcc
+@@ -17,27 +15,15 @@ SSTRIP_NAME = ELFkickers-3.1
+ CFLAGS    = -Wall -O2
+ LDFLAGS   =
+ 
++THISDIR = $(shell pwd)
+ -include $(LINUX_CONFIG)
+ 
+-all:go_build
++all:
+ 	make -C mkimage
+ 	mkdir -p sstrip
+ 	make -C $(SSTRIP_NAME)
+ 	make -C lzma
+-ifeq ($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
+ 	make -C mksquashfs_xz
+-endif
+-
+-go_build:
+-ifeq ($(GITHUB_ACTION),n)
+-	mkdir -p $(THISDIR)/go
+-	( if [ ! -f $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz ]; then \
+-	curl --create-dirs -L https://golang.google.cn/dl/go$(go_version).linux-amd64.tar.gz -o $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz ; \
+-	fi )
+-	( if [ ! -d $(THISDIR)/go/go ]; then \
+-	tar zxfv $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz -C go ; \
+-	fi )
+-endif
+ 
+ clean:
+ 	if [ -f $(SSTRIP_NAME)/Makefile ] ; then \
+@@ -46,5 +32,4 @@ clean:
+ 	rm -rf sstrip
+ 	make -C mkimage clean
+ 	make -C lzma clean
+-	make -C mksquashfs_xz clean
+-	rm -rf $(THISDIR)/go/go
++	make -C mksquashfs_xz clean
+\ No newline at end of file
+-- 
+2.25.1
+
