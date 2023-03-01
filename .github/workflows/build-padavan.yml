@@ -40,7 +40,7 @@ jobs:
     - name: Clone source code
       run: |
         git clone https://github.com/keke1023/Padavan.git /opt/rt-n56u
-        cp padavan/* cd /opt/rt-n56u
+        cp padavan/*  /opt/rt-n56u
         git config --global user.name "username"
         git config --global user.email useremail@ai.com
 
