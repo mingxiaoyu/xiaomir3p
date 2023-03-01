@@ -46,7 +46,7 @@ jobs:
 
         cd /opt/rt-n56u
         git am custom.patch
-        git am go.patch
+        # git am go.patch
         
         cd /opt/rt-n56u/toolchain-mipsel
         sh dl_toolchain.sh
