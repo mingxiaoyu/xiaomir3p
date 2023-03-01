@@ -117,13 +117,11 @@ jobs:
         sudo ./clear_tree
         sudo ./build_firmware_modify $TNAME 0
         sudo mv -f images/*.trx /opt/images/
-	
     - name: Generate release tag
       id: tag
       run: |
         echo "release_tag=p-$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT	
-	
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
