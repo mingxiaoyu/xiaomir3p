@@ -1,0 +1,123 @@
+From 2ffeb4ad701240c5d6e6e0142a5d9609c8d3bea1 Mon Sep 17 00:00:00 2001
+From: mingxiaoyu <fengying0347@163.com>
+Date: Tue, 28 Feb 2023 03:46:29 +0000
+Subject: [PATCH 1/2] custom
+
+---
+ trunk/coustom                |  2 +-
+ trunk/tools/Makefile         |  4 +++-
+ trunk/user/caddy/caddy.sh    |  2 +-
+ trunk/user/shared/defaults.h | 18 +++++++++---------
+ trunk/user/xray/Makefile     |  2 +-
+ trunk/versions.inc           |  2 +-
+ 6 files changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/trunk/coustom b/trunk/coustom
+index e1e9633a3..5d88e6c28 100644
+--- a/trunk/coustom
++++ b/trunk/coustom
+@@ -1,2 +1,2 @@
+ GOPROXY_ON = n
+-GITHUB_ACTION = y
+\ No newline at end of file
++GITHUB_ACTION = n
+\ No newline at end of file
+diff --git a/trunk/tools/Makefile b/trunk/tools/Makefile
+index 48a595f7b..19f89964d 100644
+--- a/trunk/tools/Makefile
++++ b/trunk/tools/Makefile
+@@ -1,5 +1,5 @@
+ THISDIR = $(shell pwd)
+-go_version = 1.16.6
++go_version = 1.17.6
+ # use host target
+ CC        = gcc
+ GCC       = gcc
+@@ -29,6 +29,7 @@ ifeq ($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
+ endif
+ 
+ go_build:
++ifeq ($(GITHUB_ACTION),n)
+ 	mkdir -p $(THISDIR)/go
+ 	( if [ ! -f $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz ]; then \
+ 	curl --create-dirs -L https://golang.google.cn/dl/go$(go_version).linux-amd64.tar.gz -o $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz ; \
+@@ -36,6 +37,7 @@ go_build:
+ 	( if [ ! -d $(THISDIR)/go/go ]; then \
+ 	tar zxfv $(THISDIR)/go/go$(go_version).linux-amd64.tar.gz -C go ; \
+ 	fi )
++endif
+ 
+ clean:
+ 	if [ -f $(SSTRIP_NAME)/Makefile ] ; then \
+diff --git a/trunk/user/caddy/caddy.sh b/trunk/user/caddy/caddy.sh
+index 0fac44d81..818cddc26 100644
+--- a/trunk/user/caddy/caddy.sh
++++ b/trunk/user/caddy/caddy.sh
+@@ -17,7 +17,7 @@ caddy_start ()
+ 		caddybin="/usr/bin/caddy_filebrowser"
+ 		if [ ! -f "$caddybin" ]; then
+ 			if [ ! -f "$caddy_dir/caddy/caddy_filebrowser" ]; then
+-				curl -k -s -o $caddy_dir/caddy/caddy_filebrowser --connect-timeout 10 --retry 3 https://cdn.jsdelivr.net/gh/chongshengB/rt-n56u/trunk/user/caddy/caddy_filebrowser
++				curl -k -s -o $caddy_dir/caddy/caddy_filebrowser --connect-timeout 10 --retry 3 https://ghproxy.com/https://raw.githubusercontent.com/chongshengB/rt-n56u/master/trunk/user/caddy/caddy_filebrowser
+ 				if [ ! -f "$caddy_dir/caddy/caddy_filebrowser" ]; then
+ 					logger -t "caddy" "caddy_filebrowser二进制文件下载失败，可能是地址失效或者网络异常！"
+ 					nvram set caddy_enable=0
+diff --git a/trunk/user/shared/defaults.h b/trunk/user/shared/defaults.h
+index 028810773..ec6410eff 100644
+--- a/trunk/user/shared/defaults.h
++++ b/trunk/user/shared/defaults.h
+@@ -30,19 +30,19 @@
+ #define SYS_USER_NOBODY		"nobody"
+ #define SYS_GROUP_NOGROUP	"nogroup"
+ 
+-#define DEF_LAN_ADDR		"192.168.123.1"
+-#define DEF_LAN_DHCP_BEG	"192.168.123.100"
+-#define DEF_LAN_DHCP_END	"192.168.123.244"
++#define DEF_LAN_ADDR		"192.168.31.1"
++#define DEF_LAN_DHCP_BEG	"192.168.31.100"
++#define DEF_LAN_DHCP_END	"192.168.31.244"
+ #define DEF_LAN_MASK		"255.255.255.0"
+ 
+ #define DEF_WLAN_2G_CC		"CN"
+ #define DEF_WLAN_5G_CC		"US"
+-#define DEF_WLAN_2G_SSID	"PDCN"
+-#define DEF_WLAN_5G_SSID	"PDCN_5G"
+-#define DEF_WLAN_2G_GSSID	"PDCN_GUEST"
+-#define DEF_WLAN_5G_GSSID	"PDCN_GUEST_5G"
+-#define DEF_WLAN_2G_PSK		"1234567890"
+-#define DEF_WLAN_5G_PSK		"1234567890"
++#define DEF_WLAN_2G_SSID	"Xiaomi_801_plus"
++#define DEF_WLAN_5G_SSID	"Xiaomi_801_plus_5G"
++#define DEF_WLAN_2G_GSSID	BOARD_PID "_GUEST_%s"
++#define DEF_WLAN_5G_GSSID	BOARD_PID "_GUEST_5G_%s"
++#define DEF_WLAN_2G_PSK		"mingxiaoyu"
++#define DEF_WLAN_5G_PSK		"mingxiaoyu"
+ 
+ #define DEF_ROOT_PASSWORD	"admin"
+ #define DEF_SMB_WORKGROUP	"WORKGROUP"
+diff --git a/trunk/user/xray/Makefile b/trunk/user/xray/Makefile
+index 6728d1652..8c6a2156a 100644
+--- a/trunk/user/xray/Makefile
++++ b/trunk/user/xray/Makefile
+@@ -2,7 +2,7 @@ include $(ROOTDIR)/coustom
+ THISDIR = $(shell pwd)
+ #export GO111MODULE=on
+ #export GOPROXY=https://goproxy.bj.bcebos.com/
+-Xray_VERSION := 1.5.3
++Xray_VERSION := 1.7.5
+ Xray_URL := https://codeload.github.com/XTLS/Xray-core/tar.gz/v$(Xray_VERSION)
+ Xray_dir = xray-core/Xray-core-$(Xray_VERSION)/main
+ ifeq ($(GITHUB_ACTION),n)
+diff --git a/trunk/versions.inc b/trunk/versions.inc
+index 0e3fe7d1b..537a504c2 100644
+--- a/trunk/versions.inc
++++ b/trunk/versions.inc
+@@ -1,3 +1,3 @@
+ FIRMWARE_ROOTFS_VER=3.9
+ FIRMWARE_BUILDS_VER=099
+-FIRMWARE_BUILDS_REV=KEKE
++FIRMWARE_BUILDS_REV=MXY
+\ No newline at end of file
+-- 
+2.25.1
+
