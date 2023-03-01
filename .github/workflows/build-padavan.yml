@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@main
       
     - uses: hendrikmuhs/ccache-action@v1.2
-    - uses: hashicorp/setup-golang@main
+    - uses: actions/setup-go@v3.5.0
       with:
         go-version: '^1.19'
     - uses: actions/cache@v3
@@ -34,6 +34,8 @@ jobs:
         sudo apt-get -y install unzip libtool-bin curl cmake gperf gawk flex bison nano xxd fakeroot \
         cpio git python-docutils gettext automake autopoint texinfo build-essential help2man \
         pkg-config zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget
+        # https://github.com/actions/setup-go/issues/107
+        echo "${GOROOT}/bin" >> $GITHUB_PATH
         
     - name: Clone source code
       run: |
