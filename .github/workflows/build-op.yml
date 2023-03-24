@@ -15,7 +15,7 @@ on:
 
 
 env:
-  REPO_URL: https://github.com/mingxiaoyu/immortalwrt
+  REPO_URL: https://github.com/hanwckf/immortalwrt-mt798x
   REPO_BRANCH: openwrt-21.02
   CONFIG_FILE: op/diffconfig
   DIY_P2_SH: op/diy-part2.sh
