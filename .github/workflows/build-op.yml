@@ -247,7 +247,7 @@ jobs:
     - name: Load custom configuration
       if: steps.feed.outputs.status == 'success' && !cancelled()
       run: |
-        [ -e files ] && mv files $OPENWRT_ROOT_PATH/files
+        [ -e op/files ] && mv op/files $OPENWRT_ROOT_PATH/files
         chmod +x $DIY_SH
         cd $OPENWRT_ROOT_PATH
         $GITHUB_WORKSPACE/$DIY_SH >/dev/null 2>&1
