@@ -219,13 +219,7 @@ jobs:
         sudo chown runner:runner $OPENWRT_ROOT_PATH
         cd $OPENWRT_ROOT_PATH
         git pull
-
-    - name: Load Custom feeds
-      run: |
-        chmod +x $DIY_SH
-        cd $OPENWRT_ROOT_PATH
-        $GITHUB_WORKSPACE/$DIY_SH  >/dev/null 2>&1 
-
+        
     - name: Install Feeds
       id: feed
       run: |
@@ -248,8 +242,10 @@ jobs:
       if: steps.feed.outputs.status == 'success' && !cancelled()
       run: |
         [ -e op/files ] && mv op/files $OPENWRT_ROOT_PATH/files
+        echo "111"
         chmod +x $DIY_SH
         cd $OPENWRT_ROOT_PATH
+        echo "222"
         $GITHUB_WORKSPACE/$DIY_SH >/dev/null 2>&1
         
     - name: Download Source Packages
