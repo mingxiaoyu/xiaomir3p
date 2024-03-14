@@ -124,10 +124,7 @@ jobs:
           export CURRENT_SHA=${{ env.SOURCE_BRANCH }}
         else
           export CURRENT_SHA=${{ github.event.inputs.commit_id }}
-        fi
-
-        export TMP=${{env.TOOLCHAIN_TAG}}"${CURRENT_SHA}"
-        echo "TOOLCHAIN_TAG=$TMP" >> $GITHUB_ENV
+        fi       
 
         export TOOLS_HASH=$(curl -fsSL \
           https://api.github.com/repos/$SOURCE_OWNER/$SOURCE_REPO/commits\?sha\=$CURRENT_SHA\&path\=tools | jq '.[0] | .sha' | sed 's/"//g')
@@ -136,12 +133,18 @@ jobs:
         export CURRENT_HASH=$(echo -n "$TOOLS_HASH$TOOLCHAIN_HASH" | md5sum | awk '{print $1}')
         echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
         echo "CURRENT_HASH is $CURRENT_HASH"
+
+        export TMP=${{env.TOOLCHAIN_TAG}}"${CURRENT_HASH}"
+        
         export CACHE_HASH=$(curl -fSsL https://github.com/$GITHUB_REPOSITORY/releases/download/$TMP/${TOOLCHAIN_NAME}.hash)
         echo "CACHE_HASH is $CACHE_HASH"
+       
         if [ -z "$CACHE_HASH" ] || [ "$CURRENT_HASH" != "$CACHE_HASH" ]; then
           echo "REBUILD_TOOLCHAIN=true" >> $GITHUB_OUTPUT
-        fi
-          
+        fi        
+        
+        echo "TOOLCHAIN_TAG=$TMP" >> $GITHUB_ENV
+        
     - name: Clone Source Code
       if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
       id: clone
