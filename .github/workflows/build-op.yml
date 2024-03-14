@@ -260,8 +260,6 @@ jobs:
         rm -rf feeds/packages/lang/golang
         git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
 
-        rm -rf feeds/packages/passwall_packages/shadowsocksr-libevs
-
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: Generate Config File
