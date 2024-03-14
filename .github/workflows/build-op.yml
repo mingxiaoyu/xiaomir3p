@@ -150,7 +150,7 @@ jobs:
       id: clone
       run: |
         git clone $SOURCE_URL -b $SOURCE_BRANCH $OPENWRT_ROOT_PATH
-        if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+        if [ '${{ github.event.inputs.current_version }}' == 'false' ]; then
           echo "Git checkout with commit id"
           git checkout ${{ github.event.inputs.commit_id }}
         fi
@@ -259,8 +259,6 @@ jobs:
         ./scripts/feeds install -a
         rm -rf feeds/packages/lang/golang
         git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
-
-        rm -rf feeds/packages/passwall_packages/shadowsocksr-libevs
 
         echo "status=success" >> $GITHUB_OUTPUT
         
