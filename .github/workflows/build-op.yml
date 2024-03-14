@@ -150,7 +150,9 @@ jobs:
       id: clone
       run: |
         git clone $SOURCE_URL -b $SOURCE_BRANCH $OPENWRT_ROOT_PATH
-        if [ '${{ github.event.inputs.current_version }}' == 'false' ]; then
+        if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+          echo "User current version"
+        else
           echo "Git checkout with commit id"
           git checkout ${{ github.event.inputs.commit_id }}
         fi
@@ -249,6 +251,8 @@ jobs:
       run: |
         cd $OPENWRT_ROOT_PATH
         if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+          echo "User current version"
+        else
           echo "Git checkout with commit id"
           git checkout ${{ github.event.inputs.commit_id }}
         fi
@@ -313,10 +317,11 @@ jobs:
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
         if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
-          echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
-        else
           echo "release_tag=$(date +"%Y.%m.%d-%H%M") current" >> $GITHUB_OUTPUT
-        fi        
+        else
+          echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        fi
+      
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: Upload firmware to release
