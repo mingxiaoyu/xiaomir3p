@@ -312,7 +312,11 @@ jobs:
       id: tag
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+          echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        else
+          echo "release_tag=$(date +"%Y.%m.%d-%H%M") current" >> $GITHUB_OUTPUT
+        fi        
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: Upload firmware to release
