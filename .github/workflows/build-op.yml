@@ -121,9 +121,9 @@ jobs:
       id: hash
       run: |
         if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
-          export CURRENT_SHA=$SOURCE_BRANCH
+          export CURRENT_SHA=${{ env.SOURCE_BRANCH }}
         else
-          export CURRENT_SHA=$github.event.inputs.commit_id
+          export CURRENT_SHA=${{ github.event.inputs.commit_id }}
         fi
 
         export TMP=${{env.TOOLCHAIN_TAG}}"${CURRENT_SHA}"
