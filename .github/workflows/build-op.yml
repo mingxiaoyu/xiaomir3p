@@ -12,6 +12,15 @@ name: Build R3P OpenWrt
 
 on:
   workflow_dispatch:
+    inputs:
+      current_version:
+        description: 'Current version'
+        required: true
+        default: 'false'
+      commit_id:
+        description: 'Commit ID'
+        required: true
+        default: 'e9dac2ba20c806be2db32ade21b16824755890a9'
         
 env:
   CONFIG_FILE: op/diffconfig
@@ -111,14 +120,23 @@ jobs:
     - name: Compare Toolchain Hash
       id: hash
       run: |
+        if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+          export CURRENT_SHA=$SOURCE_BRANCH
+        else
+          export CURRENT_SHA=$github.event.inputs.commit_id
+        fi
+
+        export TMP=${{env.TOOLCHAIN_TAG}}"${CURRENT_SHA}"
+        echo "TOOLCHAIN_TAG=$TMP" >> $GITHUB_ENV
+
         export TOOLS_HASH=$(curl -fsSL \
-          https://api.github.com/repos/$SOURCE_OWNER/$SOURCE_REPO/commits\?sha\=$SOURCE_BRANCH\&path\=tools | jq '.[0] | .sha' | sed 's/"//g')
+          https://api.github.com/repos/$SOURCE_OWNER/$SOURCE_REPO/commits\?sha\=$CURRENT_SHA\&path\=tools | jq '.[0] | .sha' | sed 's/"//g')
         export TOOLCHAIN_HASH=$(curl -fsSL \
-          https://api.github.com/repos/$SOURCE_OWNER/$SOURCE_REPO/commits\?sha\=$SOURCE_BRANCH\&path\=toolchain | jq '.[0] | .sha' | sed 's/"//g')
+          https://api.github.com/repos/$SOURCE_OWNER/$SOURCE_REPO/commits\?sha\=$CURRENT_SHA\&path\=toolchain | jq '.[0] | .sha' | sed 's/"//g')
         export CURRENT_HASH=$(echo -n "$TOOLS_HASH$TOOLCHAIN_HASH" | md5sum | awk '{print $1}')
         echo "CURRENT_HASH=$CURRENT_HASH" >> $GITHUB_ENV
         echo "CURRENT_HASH is $CURRENT_HASH"
-        export CACHE_HASH=$(curl -fSsL https://github.com/$GITHUB_REPOSITORY/releases/download/$TOOLCHAIN_TAG/${TOOLCHAIN_NAME}.hash)
+        export CACHE_HASH=$(curl -fSsL https://github.com/$GITHUB_REPOSITORY/releases/download/$TMP/${TOOLCHAIN_NAME}.hash)
         echo "CACHE_HASH is $CACHE_HASH"
         if [ -z "$CACHE_HASH" ] || [ "$CURRENT_HASH" != "$CACHE_HASH" ]; then
           echo "REBUILD_TOOLCHAIN=true" >> $GITHUB_OUTPUT
@@ -195,7 +213,6 @@ jobs:
         replacesArtifacts: true
         prerelease: true
         tag: ${{ env.TOOLCHAIN_TAG }}
-        commit: ${{ env.CURRENT_BRANCH }}
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: output/*
 
@@ -219,17 +236,25 @@ jobs:
         sudo chown runner:runner $OPENWRT_ROOT_PATH
         cd $OPENWRT_ROOT_PATH
         git pull
-        
+     
     - name: Install Feeds
       id: feed
       run: |
         cd $OPENWRT_ROOT_PATH
-        echo "src-git helloworld https://github.com/fw876/helloworld.git" >> "feeds.conf.default"
+        if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+          echo "Git checkout with commit id"
+          git checkout ${{ github.event.inputs.commit_id }}
+        fi
+
+        echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> "feeds.conf.default"
         ./scripts/feeds update -a
-        ./scripts/feeds install -a -f -p helloworld
+        ./scripts/feeds install -a -f -p passwall_packages
         ./scripts/feeds install -a
         rm -rf feeds/packages/lang/golang
-        svn co https://github.com/openwrt/packages/branches/openwrt-22.03/lang/golang feeds/packages/lang/golang
+        git clone https://github.com/kenzok8/golang feeds/packages/lang/golang
+
+        rm -rf feeds/packages/passwall_packages/shadowsocksr-libevs
+
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: Generate Config File
