@@ -150,6 +150,10 @@ jobs:
       id: clone
       run: |
         git clone $SOURCE_URL -b $SOURCE_BRANCH $OPENWRT_ROOT_PATH
+        if [ '${{ github.event.inputs.current_version }}' != 'false' ]; then
+          echo "Git checkout with commit id"
+          git checkout ${{ github.event.inputs.commit_id }}
+        fi
 
     - name: Generate Config File
       if: steps.hash.outputs.REBUILD_TOOLCHAIN == 'true'
